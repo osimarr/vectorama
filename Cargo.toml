@@ -1,0 +1,11 @@
+[package]
+name = "vectorama"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+approx = "0.5.1"
+na = { version = "0.33.2", package = "nalgebra", optional = true }
+
+[features]
+nalgebra = ["na"]
