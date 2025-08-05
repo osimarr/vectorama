@@ -43,10 +43,7 @@ impl Quaternion {
         if mag.abs() < f32::EPSILON {
             return Self::identity();
         }
-        Quaternion {
-            vector: self.vector / mag,
-            scalar: self.scalar / mag,
-        }
+        *self / mag
     }
 
     pub fn dot(&self, other: &Self) -> f32 {
