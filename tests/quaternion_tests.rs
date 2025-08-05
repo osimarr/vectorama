@@ -80,8 +80,8 @@ mod tests {
     }
 
     #[test]
-    fn test_quaternion_rotate_vector_identity() {
-        let q = Quaternion::identity();
+    fn test_unit_quaternion_rotate_vector_identity() {
+        let q = UnitQuaternion::identity();
         let v = Vec3::new(1.0, 2.0, 3.0);
         let rotated = q.rotate_vector(v);
         assert_relative_eq!(rotated.x, 1.0, epsilon = f32::EPSILON);
@@ -111,16 +111,16 @@ mod tests {
         let x = std::f32::consts::FRAC_PI_2;
         let y = std::f32::consts::FRAC_PI_2;
         let z = std::f32::consts::FRAC_PI_2;
-        let q = Quaternion::from_euler_angles(x, y, z);
+        let q = Quaternion::from_euler_angles_yxz(x, y, z);
         // Should be normalized
         assert_relative_eq!(q.magnitude(), 1.0, epsilon = f32::EPSILON);
     }
 
     #[test]
-    fn test_quaternion_to_axis_angle() {
+    fn test_unit_quaternion_to_axis_angle() {
         let axis = Vec3::new(0.0, 1.0, 0.0);
         let angle = std::f32::consts::FRAC_PI_2;
-        let q = Quaternion::from_axis_angle(axis, angle);
+        let q = UnitQuaternion::from_axis_angle(axis, angle);
         let (out_axis, out_angle) = q.to_axis_angle();
         assert_relative_eq!(out_axis.x, axis.x, epsilon = f32::EPSILON);
         assert_relative_eq!(out_axis.y, axis.y, epsilon = f32::EPSILON);
@@ -129,11 +129,11 @@ mod tests {
     }
 
     #[test]
-    fn test_quaternion_to_euler_angles() {
+    fn test_unit_quaternion_to_euler_angles() {
         let x = std::f32::consts::FRAC_PI_4;
         let y = std::f32::consts::FRAC_PI_4;
         let z = std::f32::consts::FRAC_PI_4;
-        let q = Quaternion::from_euler_angles(x, y, z);
+        let q = UnitQuaternion::from_euler_angles(x, y, z);
         let euler = q.to_euler_angles();
         // Should be close to input angles (allowing for floating-point error)
         assert_relative_eq!(euler.x, x, epsilon = 1e-6);
@@ -265,9 +265,9 @@ mod tests {
     }
 
     #[test]
-    fn test_quaternion_rotate_vector() {
+    fn test_unit_quaternion_rotate_vector() {
         // 180 degrees around Z axis should flip X and Y
-        let q = Quaternion::from_z_axis(std::f32::consts::PI);
+        let q = UnitQuaternion::from_z_axis(std::f32::consts::PI);
         let v = Vec3::new(1.0, 2.0, 0.0);
         let rotated = q.rotate_vector(v);
         assert_relative_eq!(rotated.x, -1.0, epsilon = 1e-6);
@@ -313,4 +313,84 @@ mod tests {
         assert_relative_eq!(uq_mid.vector.z, expected.vector.z, epsilon = 1e-6);
         assert_relative_eq!(uq_mid.scalar, expected.scalar, epsilon = 1e-6);
     }
+
+    #[test]
+    #[cfg(feature = "nalgebra")]
+    fn test_unit_quaternion_from_axis_angle_with_nalgebra() {
+        use na::{UnitQuaternion as NaUnitQuaternion, Vector3 as NaVec3};
+
+        let axis = Vec3::new(1.0, 2.0, 3.0).normalize();
+        let na_axis = na::UnitVector3::new_normalize(NaVec3::new(axis.x, axis.y, axis.z));
+        let angle = std::f32::consts::FRAC_PI_3;
+
+        let uq = UnitQuaternion::from_axis_angle(axis, angle);
+        let na_uq = NaUnitQuaternion::from_axis_angle(&na_axis, angle);
+
+        assert_relative_eq!(uq.vector.x, na_uq.coords.x, epsilon = 1e-6);
+        assert_relative_eq!(uq.vector.y, na_uq.coords.y, epsilon = 1e-6);
+        assert_relative_eq!(uq.vector.z, na_uq.coords.z, epsilon = 1e-6);
+        assert_relative_eq!(uq.scalar, na_uq.coords.w, epsilon = 1e-6);
+    }
+
+    #[test]
+    #[cfg(feature = "nalgebra")]
+    fn test_unit_quaternion_from_euler_angles_with_nalgebra() {
+        use na::{UnitQuaternion as NaUnitQuaternion, Vector3 as NaVec3};
+
+        let x = 0.1; // pitch
+        let y = 0.2; // yaw
+        let z = 0.3; // roll
+
+        let uq = UnitQuaternion::from_euler_angles(x, y, z);
+
+        // Recreate YXZ intrinsic rotation with nalgebra
+        let na_qy = NaUnitQuaternion::from_axis_angle(&NaVec3::y_axis(), y);
+        let na_qx = NaUnitQuaternion::from_axis_angle(&NaVec3::x_axis(), x);
+        let na_qz = NaUnitQuaternion::from_axis_angle(&NaVec3::z_axis(), z);
+        let na_uq = na_qy * na_qx * na_qz;
+
+        assert_relative_eq!(uq.vector.x, na_uq.coords.x, epsilon = 1e-6);
+        assert_relative_eq!(uq.vector.y, na_uq.coords.y, epsilon = 1e-6);
+        assert_relative_eq!(uq.vector.z, na_uq.coords.z, epsilon = 1e-6);
+        assert_relative_eq!(uq.scalar, na_uq.coords.w, epsilon = 1e-6);
+    }
+
+    #[test]
+    #[cfg(feature = "nalgebra")]
+    fn test_unit_quaternion_slerp_with_nalgebra() {
+        use na::UnitQuaternion as NaUnitQuaternion;
+
+        let uq1 = UnitQuaternion::from_x_axis(std::f32::consts::FRAC_PI_4);
+        let uq2 = UnitQuaternion::from_y_axis(std::f32::consts::FRAC_PI_4);
+
+        let na_uq1 = NaUnitQuaternion::from(uq1);
+        let na_uq2 = NaUnitQuaternion::from(uq2);
+
+        let uq_slerp = uq1.slerp(&uq2, 0.5);
+        let na_uq_slerp = na_uq1.slerp(&na_uq2, 0.5);
+
+        assert_relative_eq!(uq_slerp.vector.x, na_uq_slerp.coords.x, epsilon = 1e-6);
+        assert_relative_eq!(uq_slerp.vector.y, na_uq_slerp.coords.y, epsilon = 1e-6);
+        assert_relative_eq!(uq_slerp.vector.z, na_uq_slerp.coords.z, epsilon = 1e-6);
+        assert_relative_eq!(uq_slerp.scalar, na_uq_slerp.coords.w, epsilon = 1e-6);
+    }
+
+    #[test]
+    #[cfg(feature = "nalgebra")]
+    fn test_unit_quaternion_conversion_to_nalgebra_and_back() {
+        use na::UnitQuaternion as NaUnitQuaternion;
+
+        let uq = UnitQuaternion::from_euler_angles(0.1, 0.2, 0.3);
+        let na_uq: NaUnitQuaternion<f32> = uq.into();
+        let uq2: UnitQuaternion = na_uq.into();
+
+        assert_relative_eq!(uq.vector.x, uq2.vector.x, epsilon = 1e-6);
+        assert_relative_eq!(uq.vector.y, uq2.vector.y, epsilon = 1e-6);
+        assert_relative_eq!(uq.vector.z, uq2.vector.z, epsilon = 1e-6);
+        assert_relative_eq!(uq.scalar, uq2.scalar, epsilon = 1e-6);
+    }
+
+    #[test]
+    #[cfg(feature = "nalgebra")]
+    fn test_na() {}
 }

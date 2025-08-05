@@ -14,6 +14,7 @@ impl Div<f32> for &Quaternion {
     }
 }
 
+#[allow(clippy::op_ref)]
 impl Div<f32> for Quaternion {
     type Output = Quaternion;
 

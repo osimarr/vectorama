@@ -1,5 +1,6 @@
 use crate::vector::vec3::Vec3;
 
+pub mod div;
 pub mod mul;
 pub mod unit;
 
@@ -36,6 +37,17 @@ impl Quaternion {
 
     pub fn magnitude(&self) -> f32 {
         (self.vector.magnitude().powi(2) + self.scalar.powi(2)).sqrt()
+    }
+
+    pub fn inverse(&self) -> Self {
+        let mag_sq = self.magnitude().powi(2);
+        if mag_sq.abs() < f32::EPSILON {
+            return Self::identity();
+        }
+        Quaternion {
+            vector: -self.vector / mag_sq,
+            scalar: self.scalar / mag_sq,
+        }
     }
 
     pub fn normalize(&self) -> Self {
@@ -83,56 +95,12 @@ impl Quaternion {
     }
 
     // Using glTF's YXZ order for Euler angles
-    pub fn from_euler_angles(x: f32, y: f32, z: f32) -> Self {
+    pub fn from_euler_angles_yxz(x: f32, y: f32, z: f32) -> Self {
         let qx = Self::from_x_axis(x);
         let qy = Self::from_y_axis(y);
         let qz = Self::from_z_axis(z);
-        // The correct order for a YXZ rotation is qy * qx * qz
-        qz * qy * qx
-    }
 
-    pub fn rotate_vector(&self, vector: Vec3) -> Vec3 {
-        let q_vector = Quaternion::from(vector);
-        let q_conjugate = self.conjugate();
-        let rotated = self * q_vector * q_conjugate;
-        rotated.vector
-    }
-
-    pub fn to_axis_angle(&self) -> (Vec3, f32) {
-        let angle = 2.0 * self.scalar.acos();
-        let sin_half_angle = (1.0 - self.scalar.powi(2)).sqrt();
-        if sin_half_angle < f32::EPSILON {
-            return (Vec3::new(1.0, 0.0, 0.0), angle);
-        }
-        let axis = self.vector / sin_half_angle;
-        (axis, angle)
-    }
-
-    pub fn to_euler_angles(&self) -> Vec3 {
-        let qx = self.vector.x;
-        let qy = self.vector.y;
-        let qz = self.vector.z;
-        let qw = self.scalar;
-
-        // roll (x-axis rotation)
-        let sinr_cosp = 2.0 * (qw * qx + qy * qz);
-        let cosr_cosp = 1.0 - 2.0 * (qx * qx + qy * qy);
-        let roll = sinr_cosp.atan2(cosr_cosp);
-
-        // pitch (y-axis rotation)
-        let sinp = 2.0 * (qw * qy - qz * qx);
-        let pitch = if sinp.abs() >= 1.0 {
-            sinp.signum() * std::f32::consts::FRAC_PI_2 // use 90 degrees if out of range
-        } else {
-            sinp.asin()
-        };
-
-        // yaw (z-axis rotation)
-        let siny_cosp = 2.0 * (qw * qz + qx * qy);
-        let cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz);
-        let yaw = siny_cosp.atan2(cosy_cosp);
-
-        Vec3::new(roll, pitch, yaw)
+        qy * qx * qz
     }
 }
 

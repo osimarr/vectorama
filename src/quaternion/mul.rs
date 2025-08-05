@@ -48,12 +48,7 @@ impl Mul<&UnitQuaternion> for &UnitQuaternion {
     type Output = UnitQuaternion;
 
     fn mul(self, rhs: &UnitQuaternion) -> Self::Output {
-        let vector_part = self.vector.cross(&rhs.vector);
-        let scalar_part = self.scalar * rhs.scalar - self.vector.dot(&rhs.vector);
-        UnitQuaternion::from(Quaternion {
-            vector: vector_part + rhs.vector * self.scalar + self.vector * rhs.scalar,
-            scalar: scalar_part,
-        })
+        (**self * **rhs).into()
     }
 }
 
