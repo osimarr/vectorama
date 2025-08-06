@@ -1,5 +1,7 @@
 use crate::UnitQuaternion;
 
+use super::na;
+
 impl From<na::UnitQuaternion<f32>> for UnitQuaternion {
     fn from(value: na::UnitQuaternion<f32>) -> Self {
         // nalgebra (roll, pitch, yaw) translates to vectorama (x, y, z)
