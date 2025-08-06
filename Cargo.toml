@@ -2,6 +2,13 @@
 name = "vectorama"
 version = "0.1.0"
 edition = "2024"
+description = "Very simple linear algebra library for Rust"
+documentation = "https://docs.rs/vectorama"
+repository = "https://github.com/osimarr/vectorama"
+readme = "README.md"
+authors = ["David Cohen <dacohen@pm.me>"]
+keywords = ["math", "vector", "quaternion", "matrix"]
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 approx = "0.5.1"
@@ -11,3 +18,6 @@ na034 = { version = "~0.34", package = "nalgebra", optional = true }
 [features]
 nalgebra_033 = ["na033"]
 nalgebra_034 = ["na034"]
+
+[package.metadata]
+exclude = ["/.github", "/tests", "*.yml"]
