@@ -1,5 +1,7 @@
 use crate::{Vec2, Vec3, Vec4};
 
+use super::na;
+
 // Vec2 -------------------------------------------------------------------------------------------
 impl From<na::Vector2<f32>> for Vec2 {
     fn from(value: na::Vector2<f32>) -> Self {

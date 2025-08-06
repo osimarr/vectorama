@@ -20,8 +20,11 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: cargo test --verbose
+    - name: Clippy (deny warnings)
+      run: cargo clippy --verbose -- -D warnings
     - name: Build with nalgebra
-      run: cargo build --verbose --features nalgebra
+      run: cargo build --verbose --features nalgebra_033,nalgebra_034
     - name: Run tests with nalgebra
-      run: cargo test --features nalgebra
-    
+      run: cargo test --verbose --features nalgebra_033,nalgebra_034
+    - name: Clippy with nalgebra (deny warnings)
+      run: cargo clippy --verbose --features nalgebra_033,nalgebra_034 -- -D warnings

@@ -4,7 +4,6 @@ pub mod scale;
 pub mod translation;
 pub mod vector;
 
-#[cfg(feature = "nalgebra")]
 pub mod nalgebra;
 
 pub use matrix::Matrix;

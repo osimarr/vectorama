@@ -80,8 +80,8 @@ mod tests {
     }
 
     #[test]
-    fn test_quaternion_rotate_vector_identity() {
-        let q = Quaternion::identity();
+    fn test_unit_quaternion_rotate_vector_identity() {
+        let q = UnitQuaternion::identity();
         let v = Vec3::new(1.0, 2.0, 3.0);
         let rotated = q.rotate_vector(v);
         assert_relative_eq!(rotated.x, 1.0, epsilon = f32::EPSILON);
@@ -111,16 +111,16 @@ mod tests {
         let x = std::f32::consts::FRAC_PI_2;
         let y = std::f32::consts::FRAC_PI_2;
         let z = std::f32::consts::FRAC_PI_2;
-        let q = Quaternion::from_euler_angles(x, y, z);
+        let q = Quaternion::from_euler_angles_yxz(x, y, z);
         // Should be normalized
         assert_relative_eq!(q.magnitude(), 1.0, epsilon = f32::EPSILON);
     }
 
     #[test]
-    fn test_quaternion_to_axis_angle() {
+    fn test_unit_quaternion_to_axis_angle() {
         let axis = Vec3::new(0.0, 1.0, 0.0);
         let angle = std::f32::consts::FRAC_PI_2;
-        let q = Quaternion::from_axis_angle(axis, angle);
+        let q = UnitQuaternion::from_axis_angle(axis, angle);
         let (out_axis, out_angle) = q.to_axis_angle();
         assert_relative_eq!(out_axis.x, axis.x, epsilon = f32::EPSILON);
         assert_relative_eq!(out_axis.y, axis.y, epsilon = f32::EPSILON);
@@ -129,11 +129,11 @@ mod tests {
     }
 
     #[test]
-    fn test_quaternion_to_euler_angles() {
+    fn test_unit_quaternion_to_euler_angles() {
         let x = std::f32::consts::FRAC_PI_4;
         let y = std::f32::consts::FRAC_PI_4;
         let z = std::f32::consts::FRAC_PI_4;
-        let q = Quaternion::from_euler_angles(x, y, z);
+        let q = UnitQuaternion::from_euler_angles(x, y, z);
         let euler = q.to_euler_angles();
         // Should be close to input angles (allowing for floating-point error)
         assert_relative_eq!(euler.x, x, epsilon = 1e-6);
@@ -265,9 +265,9 @@ mod tests {
     }
 
     #[test]
-    fn test_quaternion_rotate_vector() {
+    fn test_unit_quaternion_rotate_vector() {
         // 180 degrees around Z axis should flip X and Y
-        let q = Quaternion::from_z_axis(std::f32::consts::PI);
+        let q = UnitQuaternion::from_z_axis(std::f32::consts::PI);
         let v = Vec3::new(1.0, 2.0, 0.0);
         let rotated = q.rotate_vector(v);
         assert_relative_eq!(rotated.x, -1.0, epsilon = 1e-6);

@@ -1,5 +1,7 @@
 use crate::Matrix;
 
+use super::na;
+
 impl<const M: usize, const N: usize>
     From<&na::Matrix<f32, na::Const<M>, na::Const<N>, na::ArrayStorage<f32, M, N>>>
     for Matrix<M, N>

@@ -1,4 +1,4 @@
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 
 use crate::{matrix::Matrix, quaternion::Quaternion, vector::vec3::Vec3};
 
@@ -25,6 +25,14 @@ impl UnitQuaternion {
         }
     }
 
+    pub fn conjugate(&self) -> Self {
+        self.quat.conjugate().into()
+    }
+
+    pub fn inverse(&self) -> Self {
+        self.conjugate()
+    }
+
     pub fn from_x_axis(angle: f32) -> Self {
         Quaternion::from_x_axis(angle).into()
     }
@@ -42,7 +50,7 @@ impl UnitQuaternion {
     }
 
     pub fn from_euler_angles(x: f32, y: f32, z: f32) -> Self {
-        Quaternion::from_euler_angles(x, y, z).into()
+        Quaternion::from_euler_angles_yxz(x, y, z).into()
     }
 
     pub fn from_rotation_matrix(matrix: &Matrix<3, 3>) -> Self {
@@ -78,6 +86,51 @@ impl UnitQuaternion {
         }
 
         UnitQuaternion::new_normalized(Vec3::new(x, y, z), w)
+    }
+
+    pub fn rotate_vector(&self, vector: Vec3) -> Vec3 {
+        let q_vector = Quaternion::from(vector);
+        let q_conjugate = self.quat.conjugate();
+        let rotated = self.quat * q_vector * q_conjugate;
+        rotated.vector
+    }
+
+    pub fn to_axis_angle(&self) -> (Vec3, f32) {
+        let angle = 2.0 * self.scalar.acos();
+        let sin_half_angle = (1.0 - self.scalar.powi(2)).sqrt();
+        if sin_half_angle < f32::EPSILON {
+            return (Vec3::new(1.0, 0.0, 0.0), angle);
+        }
+        let axis = self.vector / sin_half_angle;
+        (axis, angle)
+    }
+
+    pub fn to_euler_angles(&self) -> Vec3 {
+        let qx = self.vector.x;
+        let qy = self.vector.y;
+        let qz = self.vector.z;
+        let qw = self.scalar;
+
+        // Pitch (X-axis rotation)
+        // Handle gimbal lock: when pitch is +/- 90 degrees
+        let sinp_arg = 2.0 * (qw * qx - qy * qz);
+        let pitch = if sinp_arg.abs() >= 1.0 {
+            sinp_arg.signum() * std::f32::consts::FRAC_PI_2
+        } else {
+            sinp_arg.asin()
+        };
+
+        // Yaw (Y-axis rotation)
+        let siny_cosp = 2.0 * (qw * qy + qx * qz);
+        let cosy_cosp = 1.0 - 2.0 * (qx * qx + qy * qy);
+        let yaw = siny_cosp.atan2(cosy_cosp);
+
+        // Roll (Z-axis rotation)
+        let sinr_cosp = 2.0 * (qw * qz + qx * qy);
+        let cosr_cosp = 1.0 - 2.0 * (qx * qx + qz * qz);
+        let roll = sinr_cosp.atan2(cosr_cosp);
+
+        Vec3::new(pitch, yaw, roll)
     }
 
     pub fn rotation_matrix(&self) -> Matrix<3, 3> {
@@ -228,12 +281,6 @@ impl Deref for UnitQuaternion {
 
     fn deref(&self) -> &Self::Target {
         &self.quat
-    }
-}
-
-impl DerefMut for UnitQuaternion {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.quat
     }
 }
 // Deref and DerefMut -----------------------------------------------------------------------------

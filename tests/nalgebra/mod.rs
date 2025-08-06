@@ -1,5 +1,7 @@
 #[cfg(feature = "nalgebra_033")]
-pub mod na033;
+#[cfg(test)]
+mod na033;
 
 #[cfg(feature = "nalgebra_034")]
-pub mod na034;
+#[cfg(test)]
+mod na034;
