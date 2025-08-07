@@ -31,6 +31,16 @@ impl Default for Vector3Union {
     }
 }
 
+/// A 3D vector with `f32` components.
+///
+/// `Vec3` provides convenient methods for 3D vector arithmetic, normalization, cross and dot products,
+/// and conversion to and from other vector types.
+///
+/// # Example
+/// ```
+/// use vectorama::vector::vec3::Vec3;
+/// let v = Vec3::new(1.0, 2.0, 3.0);
+/// ```
 #[derive(Default, Clone, Copy)]
 pub struct Vec3 {
     data: Vector3Union,
@@ -47,6 +57,15 @@ impl Debug for Vec3 {
 }
 
 impl Vec3 {
+    /// Creates a new 3D vector from `x`, `y`, and `z` components.
+    ///
+    /// # Parameters
+    /// - `x`: The x component.
+    /// - `y`: The y component.
+    /// - `z`: The z component.
+    ///
+    /// # Returns
+    /// A new `Vec3` with the specified components.
     pub const fn new(x: f32, y: f32, z: f32) -> Self {
         let vector3 = Vector3 { x, y, z };
         Self {
@@ -54,43 +73,92 @@ impl Vec3 {
         }
     }
 
+    /// Returns a vector with all components set to zero.
+    ///
+    /// # Returns
+    /// A zero vector.
     pub fn zeros() -> Self {
         Self::from(Vector::zeros())
     }
 
+    /// Returns a vector with all components set to one.
+    ///
+    /// # Returns
+    /// A vector with all components equal to 1.0.
     pub fn ones() -> Self {
         Self::from(Vector::ones())
     }
 
+    /// Returns the `x` and `y` components as a `Vec2`.
+    ///
+    /// # Returns
+    /// A `Vec2` containing the x and y components.
     pub fn xy(&self) -> Vec2 {
         Vec2::new(self.x, self.y)
     }
 
+    /// Returns the `y` and `z` components as a `Vec2`.
+    ///
+    /// # Returns
+    /// A `Vec2` containing the y and z components.
     pub fn yz(&self) -> Vec2 {
         Vec2::new(self.y, self.z)
     }
 
+    /// Returns the `x` and `z` components as a `Vec2`.
+    ///
+    /// # Returns
+    /// A `Vec2` containing the x and z components.
     pub fn xz(&self) -> Vec2 {
         Vec2::new(self.x, self.z)
     }
 
+    /// Creates a `Vec4` from this vector and a given w component.
+    ///
+    /// # Parameters
+    /// - `w`: The w component for the resulting `Vec4`.
+    ///
+    /// # Returns
+    /// A `Vec4` with x, y, z from this vector and the specified w.
     pub fn xyzw(&self, w: f32) -> Vec4 {
         Vec4::new(self.x, self.y, self.z, w)
     }
 
+    /// Computes the cross product with another 3D vector.
+    ///
+    /// # Parameters
+    /// - `other`: The other vector.
+    ///
+    /// # Returns
+    /// The cross product as a `Vec3`.
     pub fn cross(&self, other: &Vec3) -> Vec3 {
         let matrix = unsafe { self.data.matrix.cross(&other.data.matrix) };
         Vec3::from(matrix)
     }
 
+    /// Computes the dot product with another 3D vector.
+    ///
+    /// # Parameters
+    /// - `other`: The other vector.
+    ///
+    /// # Returns
+    /// The dot product as a `f32`.
     pub fn dot(&self, other: &Vec3) -> f32 {
         unsafe { self.data.matrix.dot(&other.data.matrix) }
     }
 
+    /// Computes the magnitude (length) of the vector.
+    ///
+    /// # Returns
+    /// The magnitude as a `f32`.
     pub fn magnitude(&self) -> f32 {
         unsafe { self.data.matrix.magnitude() }
     }
 
+    /// Returns a normalized (unit length) version of this vector.
+    ///
+    /// # Returns
+    /// The normalized vector.
     pub fn normalize(&self) -> Vec3 {
         let matrix = unsafe { self.data.matrix.normalize() };
         Vec3::from(matrix)

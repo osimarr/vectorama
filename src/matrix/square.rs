@@ -7,6 +7,10 @@ impl<const M: usize> Default for Matrix<M, M> {
 }
 
 impl<const M: usize> Matrix<M, M> {
+    /// Returns the identity matrix of size `M x M`.
+    ///
+    /// # Returns
+    /// A matrix with ones on the diagonal and zeros elsewhere.
     pub fn identity() -> Self {
         let mut identity = Self::zeros();
         for m in 0..M {
@@ -15,6 +19,10 @@ impl<const M: usize> Matrix<M, M> {
         identity
     }
 
+    /// Attempts to compute the inverse of the matrix using Gauss-Jordan elimination.
+    ///
+    /// # Returns
+    /// `Some(inverse)` if the matrix is invertible, or `None` if it is singular.
     pub fn try_inverse(&self) -> Option<Self> {
         if M < 2 {
             // no inverse if matrix is too small
@@ -81,12 +89,20 @@ impl<const M: usize> Matrix<M, M> {
 }
 
 impl Matrix<2, 2> {
+    /// Computes the determinant of a 2x2 matrix.
+    ///
+    /// # Returns
+    /// The determinant value.
     pub fn determinant(&self) -> f32 {
         self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)]
     }
 }
 
 impl Matrix<3, 3> {
+    /// Computes the determinant of a 3x3 matrix.
+    ///
+    /// # Returns
+    /// The determinant value.
     pub fn determinant(&self) -> f32 {
         self[(0, 0)] * (self[(1, 1)] * self[(2, 2)] - self[(1, 2)] * self[(2, 1)])
             - self[(0, 1)] * (self[(1, 0)] * self[(2, 2)] - self[(1, 2)] * self[(2, 0)])
@@ -95,6 +111,10 @@ impl Matrix<3, 3> {
 }
 
 impl Matrix<4, 4> {
+    /// Computes the determinant of a 4x4 matrix.
+    ///
+    /// # Returns
+    /// The determinant value.
     pub fn determinant(&self) -> f32 {
         let mut det = 0.0;
         for col in 0..4 {
@@ -119,6 +139,15 @@ impl Matrix<4, 4> {
         det
     }
 
+    /// Constructs a right-handed look-at view matrix.
+    ///
+    /// # Parameters
+    /// - `eye`: The position of the camera.
+    /// - `target`: The point the camera is looking at.
+    /// - `up`: The up direction.
+    ///
+    /// # Returns
+    /// A 4x4 view matrix in column-major order.
     pub fn look_at(eye: impl Into<Vec3>, target: impl Into<Vec3>, up: impl Into<Vec3>) -> Self {
         let eye: Vec3 = eye.into();
         let target: Vec3 = target.into();
@@ -151,6 +180,16 @@ impl Matrix<4, 4> {
         view
     }
 
+    /// Constructs a perspective projection matrix.
+    ///
+    /// # Parameters
+    /// - `aspect`: The aspect ratio (width / height).
+    /// - `fov`: The vertical field of view in radians.
+    /// - `near`: The near clipping plane.
+    /// - `far`: The far clipping plane.
+    ///
+    /// # Returns
+    /// A 4x4 perspective projection matrix in column-major order.
     pub fn perspective(aspect: f32, fov: f32, near: f32, far: f32) -> Self {
         let f = 1.0 / (fov / 2.0).tan();
         let mut perspective = Self::zeros();
@@ -166,6 +205,15 @@ impl Matrix<4, 4> {
         perspective
     }
 
+    /// Constructs an orthographic projection matrix.
+    ///
+    /// # Parameters
+    /// - `left`, `right`: The left and right clipping planes.
+    /// - `bottom`, `top`: The bottom and top clipping planes.
+    /// - `near`, `far`: The near and far clipping planes.
+    ///
+    /// # Returns
+    /// A 4x4 orthographic projection matrix in column-major order.
     pub fn orthographic(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> Self {
         let mut ortho = Self::zeros();
         ortho[(0, 0)] = 2.0 / (right - left);

@@ -6,22 +6,53 @@ use crate::{
     vector::{Vector, vec3::Vec3},
 };
 
+/// A 3D translation represented by a vector.
+///
+/// `Translation3` encodes a translation in 3D space using a `Vec3`. It provides convenient methods
+/// for constructing, combining, and applying translations, as well as conversion to and from
+/// homogeneous transformation matrices.
+///
+/// # Example
+/// ```
+/// use vectorama::Translation3;
+/// let t = Translation3::new(1.0, 2.0, 3.0);
+/// ```
 #[derive(Default, Debug, Clone, Copy)]
 pub struct Translation3 {
     vector: Vec3,
 }
 
 impl Translation3 {
+    /// Creates a new translation from x, y, z components.
+    ///
+    /// # Parameters
+    /// - `x`: Translation along the X axis.
+    /// - `y`: Translation along the Y axis.
+    /// - `z`: Translation along the Z axis.
+    ///
+    /// # Returns
+    /// A new `Translation3` representing the given translation.
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Translation3 {
             vector: Vec3::new(x, y, z),
         }
     }
 
+    /// Returns the 4x4 homogeneous transformation matrix for this translation.
+    ///
+    /// # Returns
+    /// A 4x4 matrix representing the translation in homogeneous coordinates.
     pub fn homogeneous_matrix(&self) -> Matrix<4, 4> {
         to_homogeneous_matrix(self.vector)
     }
 
+    /// Applies this translation to a vector.
+    ///
+    /// # Parameters
+    /// - `vector`: The vector to translate.
+    ///
+    /// # Returns
+    /// The translated vector.
     pub fn translate(&self, vector: &Vec3) -> Vec3 {
         vector + self.vector
     }

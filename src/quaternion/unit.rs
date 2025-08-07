@@ -2,6 +2,17 @@ use std::ops::Deref;
 
 use crate::{matrix::Matrix, quaternion::Quaternion, vector::vec3::Vec3};
 
+/// A quaternion that is guaranteed to be normalized (unit length).
+///
+/// `UnitQuaternion` represents a rotation in 3D space using a quaternion with magnitude 1.
+/// All operations and constructors ensure the quaternion remains normalized, making it safe for use
+/// in rotation and interpolation operations where unit quaternions are required.
+///
+/// # Example
+/// ```
+/// use vectorama::UnitQuaternion;
+/// let uq = UnitQuaternion::from_axis_angle([0.0, 1.0, 0.0].into(), 1.0);
+/// ```
 #[derive(Debug, Clone, Copy)]
 pub struct UnitQuaternion {
     quat: Quaternion,
@@ -14,45 +25,110 @@ impl Default for UnitQuaternion {
 }
 
 impl UnitQuaternion {
+    /// Creates a new unit quaternion from a vector and scalar, normalizing the result.
+    ///
+    /// # Parameters
+    /// - `vector`: The vector (imaginary) part.
+    /// - `scalar`: The scalar (real) part.
+    ///
+    /// # Returns
+    /// A normalized unit quaternion.
     pub fn new_normalized(vector: Vec3, scalar: f32) -> Self {
         let quat = Quaternion { vector, scalar }.normalize();
         Self { quat }
     }
 
+    /// Returns the identity unit quaternion (no rotation).
+    ///
+    /// # Returns
+    /// The identity unit quaternion.
     pub fn identity() -> Self {
         Self {
             quat: Quaternion::identity(),
         }
     }
 
+    /// Returns the conjugate of the unit quaternion.
+    ///
+    /// # Returns
+    /// The conjugate, which negates the vector part and keeps the scalar part.
     pub fn conjugate(&self) -> Self {
         self.quat.conjugate().into()
     }
 
+    /// Returns the inverse of the unit quaternion.
+    ///
+    /// # Returns
+    /// The inverse, which for unit quaternions is the conjugate.
     pub fn inverse(&self) -> Self {
         self.conjugate()
     }
 
+    /// Creates a unit quaternion representing a rotation around the X axis.
+    ///
+    /// # Parameters
+    /// - `angle`: The rotation angle in radians.
+    ///
+    /// # Returns
+    /// The unit quaternion representing the rotation.
     pub fn from_x_axis(angle: f32) -> Self {
         Quaternion::from_x_axis(angle).into()
     }
 
+    /// Creates a unit quaternion representing a rotation around the Y axis.
+    ///
+    /// # Parameters
+    /// - `angle`: The rotation angle in radians.
+    ///
+    /// # Returns
+    /// The unit quaternion representing the rotation.
     pub fn from_y_axis(angle: f32) -> Self {
         Quaternion::from_y_axis(angle).into()
     }
 
+    /// Creates a unit quaternion representing a rotation around the Z axis.
+    ///
+    /// # Parameters
+    /// - `angle`: The rotation angle in radians.
+    ///
+    /// # Returns
+    /// The unit quaternion representing the rotation.
     pub fn from_z_axis(angle: f32) -> Self {
         Quaternion::from_z_axis(angle).into()
     }
 
+    /// Creates a unit quaternion from an axis and an angle.
+    ///
+    /// # Parameters
+    /// - `axis`: The axis of rotation (will be normalized).
+    /// - `angle`: The rotation angle in radians.
+    ///
+    /// # Returns
+    /// The unit quaternion representing the rotation.
     pub fn from_axis_angle(axis: Vec3, angle: f32) -> Self {
         Quaternion::from_axis_angle(axis, angle).into()
     }
 
+    /// Creates a unit quaternion from Euler angles using the YXZ order (glTF standard).
+    ///
+    /// # Parameters
+    /// - `x`: Rotation around the X axis (pitch), in radians.
+    /// - `y`: Rotation around the Y axis (yaw), in radians.
+    /// - `z`: Rotation around the Z axis (roll), in radians.
+    ///
+    /// # Returns
+    /// The unit quaternion representing the combined rotation.
     pub fn from_euler_angles(x: f32, y: f32, z: f32) -> Self {
         Quaternion::from_euler_angles_yxz(x, y, z).into()
     }
 
+    /// Creates a unit quaternion from a 3x3 rotation matrix.
+    ///
+    /// # Parameters
+    /// - `matrix`: A 3x3 rotation matrix.
+    ///
+    /// # Returns
+    /// The unit quaternion representing the rotation.
     pub fn from_rotation_matrix(matrix: &Matrix<3, 3>) -> Self {
         // Assumes matrix is a valid rotation matrix (orthonormal, det=1)
         let m = matrix;
@@ -88,6 +164,13 @@ impl UnitQuaternion {
         UnitQuaternion::new_normalized(Vec3::new(x, y, z), w)
     }
 
+    /// Rotates a vector by this unit quaternion.
+    ///
+    /// # Parameters
+    /// - `vector`: The vector to rotate.
+    ///
+    /// # Returns
+    /// The rotated vector.
     pub fn rotate_vector(&self, vector: Vec3) -> Vec3 {
         let q_vector = Quaternion::from(vector);
         let q_conjugate = self.quat.conjugate();
@@ -95,6 +178,10 @@ impl UnitQuaternion {
         rotated.vector
     }
 
+    /// Converts the unit quaternion to axis-angle representation.
+    ///
+    /// # Returns
+    /// A tuple containing the axis (as a normalized Vec3) and the rotation angle in radians.
     pub fn to_axis_angle(&self) -> (Vec3, f32) {
         let angle = 2.0 * self.scalar.acos();
         let sin_half_angle = (1.0 - self.scalar.powi(2)).sqrt();
@@ -105,6 +192,10 @@ impl UnitQuaternion {
         (axis, angle)
     }
 
+    /// Converts the unit quaternion to Euler angles using the YXZ order (glTF standard).
+    ///
+    /// # Returns
+    /// A Vec3 containing the Euler angles (x, y, z) in radians.
     pub fn to_euler_angles(&self) -> Vec3 {
         let qx = self.vector.x;
         let qy = self.vector.y;
@@ -133,10 +224,18 @@ impl UnitQuaternion {
         Vec3::new(pitch, yaw, roll)
     }
 
+    /// Returns the 3x3 rotation matrix corresponding to this unit quaternion.
+    ///
+    /// # Returns
+    /// A 3x3 rotation matrix.
     pub fn rotation_matrix(&self) -> Matrix<3, 3> {
         self.homogeneous_matrix().view(0, 0)
     }
 
+    /// Returns the 4x4 homogeneous transformation matrix corresponding to this unit quaternion.
+    ///
+    /// # Returns
+    /// A 4x4 homogeneous matrix.
     pub fn homogeneous_matrix(&self) -> Matrix<4, 4> {
         let q = &self.quat;
         let x = q.vector.x;
@@ -162,6 +261,14 @@ impl UnitQuaternion {
         ])
     }
 
+    /// Performs spherical linear interpolation (slerp) between this and another unit quaternion.
+    ///
+    /// # Parameters
+    /// - `other`: The target unit quaternion.
+    /// - `t`: Interpolation factor in [0, 1].
+    ///
+    /// # Returns
+    /// The interpolated unit quaternion.
     pub fn slerp(&self, other: &Self, t: f32) -> Self {
         // Dot product of the two quaternions.
         let mut dot = self.dot(other);

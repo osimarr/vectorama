@@ -7,7 +7,22 @@ pub mod vector;
 pub mod nalgebra;
 
 pub use matrix::Matrix;
+/// A 3x3 column-major matrix of `f32` values, matching OpenGL and glTF conventions.
+///
+/// # Example
+/// ```
+/// use vectorama::Mat3;
+/// let m = Mat3::ones();
+/// ```
 pub type Mat3 = Matrix<3, 3>;
+
+/// A 4x4 column-major matrix of `f32` values, matching OpenGL and glTF conventions.
+///
+/// # Example
+/// ```
+/// use vectorama::Mat4;
+/// let m = Mat4::ones();
+/// ```
 pub type Mat4 = Matrix<4, 4>;
 
 pub use vector::Vector;
