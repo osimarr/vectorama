@@ -6,6 +6,17 @@ pub mod vec4;
 
 use crate::matrix::Matrix;
 
+/// A column vector of `f32` values with `M` rows.
+///
+/// `Vector<M>` is an alias for a column-major `Matrix<M, 1>`, providing convenient methods for
+/// vector arithmetic, dot and cross products, normalization, and conversion. This type is used
+/// throughout the library for generic vector operations of arbitrary dimension.
+///
+/// # Example
+/// ```
+/// use vectorama::vector::Vector;
+/// let v = Vector::<3>::from([1.0, 2.0, 3.0]);
+/// ```
 pub type Vector<const M: usize> = Matrix<M, 1>;
 
 // Index and IndexMut -----------------------------------------------------------------------------

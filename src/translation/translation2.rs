@@ -6,22 +6,52 @@ use crate::{
     vector::{Vector, vec2::Vec2},
 };
 
+/// A 2D translation represented by a vector.
+///
+/// `Translation2` encodes a translation in 2D space using a `Vec2`. It provides convenient methods
+/// for constructing, combining, and applying translations, as well as conversion to and from
+/// homogeneous transformation matrices.
+///
+/// # Example
+/// ```
+/// use vectorama::Translation2;
+/// let t = Translation2::new(1.0, 2.0);
+/// ```
 #[derive(Default, Debug, Clone, Copy)]
 pub struct Translation2 {
     vector: Vec2,
 }
 
 impl Translation2 {
+    /// Creates a new translation from x, y components.
+    ///
+    /// # Parameters
+    /// - `x`: Translation along the X axis.
+    /// - `y`: Translation along the Y axis.
+    ///
+    /// # Returns
+    /// A new `Translation2` representing the given translation.
     pub fn new(x: f32, y: f32) -> Self {
         Translation2 {
             vector: Vec2::new(x, y),
         }
     }
 
+    /// Returns the 3x3 homogeneous transformation matrix for this translation.
+    ///
+    /// # Returns
+    /// A 3x3 matrix representing the translation in homogeneous coordinates.
     pub fn homogeneous_matrix(&self) -> Matrix<3, 3> {
         to_homogeneous_matrix(self.vector)
     }
 
+    /// Applies this translation to a vector.
+    ///
+    /// # Parameters
+    /// - `vector`: The vector to translate.
+    ///
+    /// # Returns
+    /// The translated vector.
     pub fn translate(&self, vector: &Vec2) -> Vec2 {
         vector + self.vector
     }
