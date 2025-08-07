@@ -1,6 +1,6 @@
 [package]
 name = "vectorama"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Very simple linear algebra library for Rust"
 documentation = "https://docs.rs/vectorama"
